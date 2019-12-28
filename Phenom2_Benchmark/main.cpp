@@ -62,12 +62,20 @@ void Execute(int threadID)
 int main()
 {
 	double phenom2_performance[] = {
-		30.099969,
-		30.564951,
-		30.106989,
-		82.588283,
-		30.091751,
-		41.371507
+		// Multithreaded
+		30.099969,			// Add
+		30.564951,			// Bool
+		30.106989,			// Shift CL
+		82.588283,			// MMX
+		30.091751,			// CMOVcc
+		41.371507,			// Flops
+		// Single threaded
+		7.5403567,			// Add
+		7.6557838,			// Bool
+		7.5400756,			// Shift CL
+		20.704509,			// MMX
+		7.5366694,			// CMOVcc
+		10.36873,			// Flops
 	};
 
 	// Check for AVX capability
@@ -117,13 +125,14 @@ int main()
 			std::cout<<"4. PADDB MMX		(Obsolete instruction set)"<< std::endl;
 			std::cout<<"5. CMOVcc REG, REG	(Branchless programming)" << std::endl;
 			std::cout<<"6. FLOPS		(Floating point with best set)" << std::endl;
+			std::cout<<"7. Toggle Multi vs. Single Threads (Current="<<threadCount<<")"<<std::endl;
 			std::cout<<"0. Quit" << std::endl;
 
 			std::cin>>option;
 	
 			// Reset to -1 if the input is invalid
-			option = (option * (option >= 0 && option <= 6))
-				+ (-1 * !(option >= 0 && option <= 6));
+			option = (option * (option >= 0 && option <= 7))
+				+ (-1 * !(option >= 0 && option <= 7));
 		}
 
 		switch (option)
@@ -134,13 +143,17 @@ int main()
 		case 3: currentFunction = SHR_REG_CL; break;
 		case 4: currentFunction = PADDB_MMX; break;
 		case 5: currentFunction = CMOVcc_REG_REG; break;
-		case 6: currentFunction = (void (*)(int))
+		case 6: currentFunction = (void (*)(int))				// Select SSE or AVX
 			((unsigned long long)FLOPS_SSE * !AVX_CAPABLE +
 			(unsigned long long)FLOPS_AVX * AVX_CAPABLE); break;
+		case 7: threadCount = (1 * (threadCount != 1)) +		// Toggle threaded or single thread
+			(std::thread::hardware_concurrency() * (threadCount == 1)); break;
 		}
 
-		if (option == 0)
+		if (option == 0)	// Allow quit
 			break;
+		if (option == 7)	// Continue if the thread count has been changed
+			continue;
 
 		// Loop RUNS times through the benchmark
 		for (int r = 0; r < RUNS; r++)
@@ -181,7 +194,8 @@ int main()
 		double gops = ((((1024*1024*1024)/1000000000.0)
 			/ fastest) * (double)JOB_COUNT);
 
-		double phenom2 = phenom2_performance[option-1];
+		double phenom2 = phenom2_performance[(option-1)
+		 + (6 * (threadCount == 1))];
 
 		std::cout<<"Executed "<< gops << " billion instructions/second" <<std::endl;
 		std::cout<<	"Score: "<< (gops / phenom2) << " Phenom's II's worth's" << std::endl;
