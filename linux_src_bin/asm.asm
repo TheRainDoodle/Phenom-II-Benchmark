@@ -1,0 +1,7 @@
+%include "AND_REG_REG.asm"
+%include "CMOVcc_REG_REG.asm"
+%include "PADDB_MMX.asm"
+%include "ADD_REG_1.asm"
+%include "SHR_REG_CL.asm"
+%include "AVXChecker.asm"
+%include "FLOPS.asm"
