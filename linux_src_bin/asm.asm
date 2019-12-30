@@ -5,3 +5,4 @@
 %include "SHR_REG_CL.asm"
 %include "AVXChecker.asm"
 %include "FLOPS.asm"
+%include "IMUL_REG_REG.asm"

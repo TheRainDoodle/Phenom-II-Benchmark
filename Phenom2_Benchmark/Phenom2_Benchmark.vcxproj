@@ -134,6 +134,7 @@
     <MASM Include="AVXChecker.asm" />
     <MASM Include="CMOVcc_REG_REG.asm" />
     <MASM Include="FLOPS.asm" />
+    <MASM Include="IMUL_REG_REG.asm" />
     <MASM Include="PADDB_MMX.asm" />
     <MASM Include="SHR_REG_CL.asm" />
   </ItemGroup>

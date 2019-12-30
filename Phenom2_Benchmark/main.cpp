@@ -4,8 +4,9 @@
 #include <mutex>
 #include <vector>
 
-// Checker function for AVX
+// Checker function for AVX and SSE
 extern "C" bool GetAVXCapability();
+extern "C" bool GetSSECapability();
 
 // Job functions  (Note: ThreadID is included for future versions)
 // Each executes 1024^3 times, 1 gig, or around 1 billion operations.
@@ -16,6 +17,9 @@ extern "C" void PADDB_MMX(int threadID);
 extern "C" void CMOVcc_REG_REG(int threadID);
 extern "C" void FLOPS_SSE(int threadID);
 extern "C" void FLOPS_AVX(int threadID);
+
+// MUL added for Reirei
+extern "C" void IMUL_REG_REG(int threadID);
 
 // Lock for the jobs vector
 std::mutex workMutex;
@@ -69,6 +73,7 @@ int main()
 		82.588283,			// MMX
 		30.091751,			// CMOVcc
 		41.371507,			// Flops
+		5.181,				// IMUL
 		// Single threaded
 		7.5403567,			// Add
 		7.6557838,			// Bool
@@ -76,10 +81,12 @@ int main()
 		20.704509,			// MMX
 		7.5366694,			// CMOVcc
 		10.36873,			// Flops
+		1.296				// IMUL
 	};
 
-	// Check for AVX capability
+	// Check for AVX and SSE capability
 	bool AVX_CAPABLE = GetAVXCapability();
+	bool SSE_CAPABLE = GetSSECapability();
 
 	// Limit output digits to 4
 	std::cout.precision(4);
@@ -98,13 +105,17 @@ int main()
 	std::cout<< std::endl;
 	std::cout<<"This benchmark will time your CPU performance against an"<< std::endl;
 	std::cout<<"AMD Quad Core Phenom II 810 from the year 2009."<< std::endl;
-	std::cout<<"Note: SSE2 is minimum SIMD required"<< std::endl;
 	std::cout<<std::endl;
 
 	if (AVX_CAPABLE)
 		std::cout<<"AVX CPU detected!"<< std::endl;
 	else
 		std::cout<<"No AVX support detected" << std::endl;
+	if (SSE_CAPABLE)
+		std::cout<<"SSE CPU detected!" << std::endl;
+	else
+		std::cout<<"SSE capable CPU is required FLOPS test."<<std::endl;
+
 	std::cout<<"Threads available: "<< threadCount << " vs. 4 for Phenom II" << std::endl;
 
 	while (option != 0)
@@ -125,14 +136,15 @@ int main()
 			std::cout<<"4. PADDB MMX		(Obsolete instruction set)"<< std::endl;
 			std::cout<<"5. CMOVcc REG, REG	(Branchless programming)" << std::endl;
 			std::cout<<"6. FLOPS		(Floating point with best set)" << std::endl;
-			std::cout<<"7. Toggle Multi vs. Single Threads (Current="<<threadCount<<")"<<std::endl;
+			std::cout<<"7. IMUL REG, REG	(GPR Multiplication)"<< std::endl;
+			std::cout<<"8. Toggle Multi vs. Single Threads (Current="<<threadCount<<")"<<std::endl;
 			std::cout<<"0. Quit" << std::endl;
 
 			std::cin>>option;
 	
 			// Reset to -1 if the input is invalid
-			option = (option * (option >= 0 && option <= 7))
-				+ (-1 * !(option >= 0 && option <= 7));
+			option = (option * (option >= 0 && option <= 8))
+				+ (-1 * !(option >= 0 && option <= 8));
 		}
 
 		switch (option)
@@ -146,13 +158,14 @@ int main()
 		case 6: currentFunction = (void (*)(int))				// Select SSE or AVX
 			((unsigned long long)FLOPS_SSE * !AVX_CAPABLE +
 			(unsigned long long)FLOPS_AVX * AVX_CAPABLE); break;
-		case 7: threadCount = (1 * (threadCount != 1)) +		// Toggle threaded or single thread
+		case 7: currentFunction = IMUL_REG_REG; break;
+		case 8: threadCount = (1 * (threadCount != 1)) +		// Toggle threaded or single thread
 			(std::thread::hardware_concurrency() * (threadCount == 1)); break;
 		}
 
 		if (option == 0)	// Allow quit
 			break;
-		if (option == 7)	// Continue if the thread count has been changed
+		if (option == 8)	// Continue if the thread count has been changed
 			continue;
 
 		// Loop RUNS times through the benchmark
@@ -195,7 +208,7 @@ int main()
 			/ fastest) * (double)JOB_COUNT);
 
 		double phenom2 = phenom2_performance[(option-1)
-		 + (6 * (threadCount == 1))];
+		 + (7 * (threadCount == 1))];
 
 		std::cout<<"Executed "<< gops << " billion instructions/second" <<std::endl;
 		std::cout<<	"Score: "<< (gops / phenom2) << " Phenom's II's worth's" << std::endl;

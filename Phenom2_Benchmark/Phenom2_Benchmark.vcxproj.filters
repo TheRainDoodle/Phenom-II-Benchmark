@@ -41,5 +41,8 @@
     <MASM Include="AND_REG_REG.asm">
       <Filter>Source Files</Filter>
     </MASM>
+    <MASM Include="IMUL_REG_REG.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
