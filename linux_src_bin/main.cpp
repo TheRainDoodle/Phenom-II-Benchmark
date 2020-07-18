@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <ctime>
 #include <thread>
 #include <mutex>
@@ -63,25 +64,50 @@ void Execute(int threadID)
     }
 }
 
+void WriteResults(std::string line)
+{
+    // Output file
+    std::ofstream resultsFile;
+
+    // append instead of overwrite
+    resultsFile.open("results.txt", std::ios_base::app);
+
+    // write line
+    resultsFile << line;
+
+    // close file
+    resultsFile.close();
+}
+
 int main()
 {
     double phenom2_performance[] = {
         // Multithreaded
-        30.099969,			// Add
-        30.564951,			// Bool
-        30.106989,			// Shift CL
-        82.588283,			// MMX
-        30.091751,			// CMOVcc
-        41.371507,			// Flops
-        1.0,				// IMUL
+        30.099969,          // Add
+        30.564951,          // Bool
+        30.106989,          // Shift CL
+        82.588283,          // MMX
+        30.091751,          // CMOVcc
+        41.371507,          // Flops
+        1.0,                // IMUL
         // Single threaded
-        7.5403567,			// Add
-        7.6557838,			// Bool
-        7.5400756,			// Shift CL
-        20.704509,			// MMX
-        7.5366694,			// CMOVcc
-        10.36873,			// Flops
-        1.0					// IMUL
+        7.5403567,          // Add
+        7.6557838,          // Bool
+        7.5400756,          // Shift CL
+        20.704509,          // MMX
+        7.5366694,          // CMOVcc
+        10.36873,           // Flops
+        1.0	                // IMUL
+    };
+
+    std::string test_names[] = {
+        "ADD REG, 1       (GPR arithmetic)",
+        "AND REG, REG     (GPR Boolean)",
+        "SHR REG, CL      (Variable shifts - Phenom's phorte)",
+        "PADDB MMX        (Obsolete instruction set)",
+        "CMOVcc REG, REG  (Branchless programming)",
+        "FLOPS            (Floating point with best set)",
+        "IMUL REG, REG    (GPR Multiplication)"
     };
 
     // Check for AVX capability
@@ -127,13 +153,13 @@ int main()
         {
             std::cout<<std::endl;
             std::cout<<"Select a benchmark (or 0 to quit): "<< std::endl;
-            std::cout<<"1. ADD REG, 1       (GPR arithmetic)" << std::endl;
-            std::cout<<"2. AND REG, REG     (GPR Boolean)" << std::endl;
-            std::cout<<"3. SHR REG, CL      (Variable shifts - Phenom's phorte)" << std::endl;
-            std::cout<<"4. PADDB MMX        (Obsolete instruction set)"<< std::endl;
-            std::cout<<"5. CMOVcc REG, REG  (Branchless programming)" << std::endl;
-            std::cout<<"6. FLOPS            (Floating point with best set)" << std::endl;
-            std::cout<<"7. IMUL REG, REG    (GPR Multiplication)"<< std::endl;
+            std::cout<<"1. " << test_names[0] << std::endl;
+            std::cout<<"2. " << test_names[1] << std::endl;
+            std::cout<<"3. " << test_names[2] << std::endl;
+            std::cout<<"4. " << test_names[3] << std::endl;
+            std::cout<<"5. " << test_names[4] << std::endl;
+            std::cout<<"6. " << test_names[5] << std::endl;
+            std::cout<<"7. " << test_names[6] << std::endl;
             std::cout<<"8. Toggle Multi vs. Single Threads (Current="<<threadCount<<")"<<std::endl;
             std::cout<<"9. All" << std::endl;
             std::cout<<"0. Quit" << std::endl;
@@ -155,11 +181,12 @@ int main()
             int testOption = (((test % 8) + 1) * (option == 9)) + 
                 (option * (option != 9));
 
+            std::string testHeader = "\nTest=" + std::to_string(testOption) + " Threads=" + 
+                std::to_string(threadCount) + "\n" + test_names[testOption-1] + "\n";
+            WriteResults(testHeader);
+
             if (option == 9 && testOption != 8)
-            {
-                std::cout<<std::endl;
-                std::cout<<"Test="<<testOption<<" Threads="<<threadCount<<std::endl;
-            }
+                std::cout << testHeader;
 
             switch (testOption)
             {
@@ -225,8 +252,14 @@ int main()
             double phenom2 = phenom2_performance[(testOption-1)
              + (7 * (threadCount == 1))];
 
-            std::cout<<"Executed "<< gops << " billion instructions/second" <<std::endl;
-            std::cout<<	"Score: "<< (gops / phenom2) << " Phenom's II's worth's" << std::endl;
+            std::string instructions = "Executed " + std::to_string(gops) + " billion instructions/second\n";
+            std::string score = "Score: " + std::to_string(gops / phenom2) + " Phenom's II's worth's\n";
+
+            std::cout << instructions;
+            std::cout << score;
+
+            WriteResults(instructions);
+            WriteResults(score);
         }
     }
 
