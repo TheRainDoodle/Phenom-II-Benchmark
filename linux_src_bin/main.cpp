@@ -123,9 +123,6 @@ int main()
         // Reset option
         option = -1;
 
-        // Reset fastest:
-        fastest = 0.0;
-
         while (option == -1)
         {
             std::cout<<std::endl;
@@ -138,81 +135,99 @@ int main()
             std::cout<<"6. FLOPS            (Floating point with best set)" << std::endl;
             std::cout<<"7. IMUL REG, REG    (GPR Multiplication)"<< std::endl;
             std::cout<<"8. Toggle Multi vs. Single Threads (Current="<<threadCount<<")"<<std::endl;
+            std::cout<<"9. All" << std::endl;
             std::cout<<"0. Quit" << std::endl;
 
             std::cin>>option;
     
             // Reset to -1 if the input is invalid
-            option = (option * (option >= 0 && option <= 8))
-                + (-1 * !(option >= 0 && option <= 8));
+            option = (option * (option >= 0 && option <= 9))
+                + (-1 * !(option >= 0 && option <= 9));
         }
 
-        switch (option)
+        // Loop through once for everything except option 9
+        for (int test = 0; test < (15 * (option == 9) + 1 * (option != 9)); test++)
         {
-        case 0: break;
-        case 1: currentFunction = ADD_REG_1; break;
-        case 2: currentFunction = AND_REG_REG; break;
-        case 3: currentFunction = SHR_REG_CL; break;
-        case 4: currentFunction = PADDB_MMX; break;
-        case 5: currentFunction = CMOVcc_REG_REG; break;
-        case 6: currentFunction = (void (*)(int))               // Select SSE or AVX
-            ((unsigned long long)FLOPS_SSE * !AVX_CAPABLE +
-            (unsigned long long)FLOPS_AVX * AVX_CAPABLE); break;
-        case 7: currentFunction = IMUL_REG_REG; break;
-        case 8: threadCount = (1 * (threadCount != 1)) +        // Toggle threaded or single thread
-            (std::thread::hardware_concurrency() * (threadCount == 1)); break;
+            // Reset fastest:
+            fastest = 0.0;
+
+            // Iterate test if option 9 was chosen
+            int testOption = (((test % 8) + 1) * (option == 9)) + 
+                (option * (option != 9));
+
+            if (option == 9 && testOption != 8)
+            {
+                std::cout<<std::endl;
+                std::cout<<"Test="<<testOption<<" Threads="<<threadCount<<std::endl;
+            }
+
+            switch (testOption)
+            {
+            case 0: break;
+            case 1: currentFunction = ADD_REG_1; break;
+            case 2: currentFunction = AND_REG_REG; break;
+            case 3: currentFunction = SHR_REG_CL; break;
+            case 4: currentFunction = PADDB_MMX; break;
+            case 5: currentFunction = CMOVcc_REG_REG; break;
+            case 6: currentFunction = (void (*)(int))               // Select SSE or AVX
+                ((unsigned long long)FLOPS_SSE * !AVX_CAPABLE +
+                (unsigned long long)FLOPS_AVX * AVX_CAPABLE); break;
+            case 7: currentFunction = IMUL_REG_REG; break;
+            case 8: threadCount = (1 * (threadCount != 1)) +        // Toggle threaded or single thread
+                (std::thread::hardware_concurrency() * (threadCount == 1)); break;
+            }
+
+            if (testOption == 0)    // Allow quit
+                break;
+            if (testOption == 8)    // Continue if the thread count has been changed
+                continue;
+
+            // Loop RUNS times through the benchmark
+            for (int r = 0; r < RUNS; r++)
+            {
+                // Add jobs to the Jobs vector
+                for (int i = 0; i < JOB_COUNT; i++)
+                    work.push_back(currentFunction);
+
+                // Start the clock
+                long startTime = clock();
+
+                // Start the threads
+                for (int i = 0; i < threadCount; i++)
+                    t[i] = new std::thread(Execute, i);
+
+                // Wait for them to finish
+                for (int i = 0; i < threadCount; i++)
+                    t[i]->join();
+
+                // Stop the clock
+                long finishTime = clock();
+
+                // Compute the time taken for this run
+                double thisTime = (double)(finishTime - startTime) / CLOCKS_PER_SEC;
+                thisTime /= (double)threadCount;    // ctime's clock seems to sum times of each thread
+
+                // Update fastest if this time beat it
+                if (thisTime < fastest || fastest == 0.0)
+                    fastest = thisTime;
+
+                // Output time for this run
+                std::cout<<"Run "<< (r+1) << "/" << RUNS <<" Time: "<< thisTime << std::endl;
+
+                // Delete the threads
+                for (int i = 0; i < threadCount; i++)
+                    delete t[i];
+            }
+
+            double gops = ((((1024*1024*1024)/1000000000.0)
+                / fastest) * (double)JOB_COUNT);
+
+            double phenom2 = phenom2_performance[(testOption-1)
+             + (7 * (threadCount == 1))];
+
+            std::cout<<"Executed "<< gops << " billion instructions/second" <<std::endl;
+            std::cout<<	"Score: "<< (gops / phenom2) << " Phenom's II's worth's" << std::endl;
         }
-
-        if (option == 0)    // Allow quit
-            break;
-        if (option == 8)    // Continue if the thread count has been changed
-            continue;
-
-        // Loop RUNS times through the benchmark
-        for (int r = 0; r < RUNS; r++)
-        {
-            // Add jobs to the Jobs vector
-            for (int i = 0; i < JOB_COUNT; i++)
-                work.push_back(currentFunction);
-
-            // Start the clock
-            long startTime = clock();
-
-            // Start the threads
-            for (int i = 0; i < threadCount; i++)
-                t[i] = new std::thread(Execute, i);
-
-            // Wait for them to finish
-            for (int i = 0; i < threadCount; i++)
-                t[i]->join();
-
-            // Stop the clock
-            long finishTime = clock();
-
-            // Compute the time taken for this run
-            double thisTime = (double)(finishTime - startTime) / CLOCKS_PER_SEC;
-            thisTime /= (double)threadCount;    // ctime's clock seems to sum times of each thread
-
-            // Update fastest if this time beat it
-            if (thisTime < fastest || fastest == 0.0)
-                fastest = thisTime;
-
-            // Output time for this run
-            std::cout<<"Run "<< (r+1) << "/" << RUNS <<" Time: "<< thisTime << std::endl;
-
-            // Delete the threads
-            for (int i = 0; i < threadCount; i++)
-                delete t[i];
-        }
-
-        double gops = ((((1024*1024*1024)/1000000000.0)
-            / fastest) * (double)JOB_COUNT);
-
-        double phenom2 = phenom2_performance[(option-1)
-         + (7 * (threadCount == 1))];
-
-        std::cout<<"Executed "<< gops << " billion instructions/second" <<std::endl;
-        std::cout<<	"Score: "<< (gops / phenom2) << " Phenom's II's worth's" << std::endl;
     }
 
     std::cout<<"See ya... "<< std::endl;
