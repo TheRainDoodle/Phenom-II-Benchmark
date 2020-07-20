@@ -181,13 +181,6 @@ int main()
             int testOption = (((test % 8) + 1) * (option == 9)) + 
                 (option * (option != 9));
 
-            std::string testHeader = "\nTest=" + std::to_string(testOption) + " Threads=" + 
-                std::to_string(threadCount) + "\n" + test_names[testOption-1] + "\n";
-            WriteResults(testHeader);
-
-            if (option == 9 && testOption != 8)
-                std::cout << testHeader;
-
             switch (testOption)
             {
             case 0: break;
@@ -208,6 +201,17 @@ int main()
                 break;
             if (testOption == 8)    // Continue if the thread count has been changed
                 continue;
+
+            std::string testHeader = "\nTest=" + std::to_string(testOption) + " Threads=" +
+                std::to_string(threadCount) + "\n" + test_names[testOption - 1] + "\n";
+
+            // Always write header to the file
+            WriteResults(testHeader);
+
+            if (option == 9)
+                // Only need to write to console when testing all
+                // because user doesn't know what test it is on
+                std::cout << testHeader;
 
             // Loop RUNS times through the benchmark
             for (int r = 0; r < RUNS; r++)
