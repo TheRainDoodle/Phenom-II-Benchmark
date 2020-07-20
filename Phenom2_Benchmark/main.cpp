@@ -186,10 +186,15 @@ int main()
                 std::to_string(threadCount) + "\n" + test_names[testOption - 1] + "\n";
 
             if (testOption != 8)
+            {
+                // Always write header to the file
                 WriteResults(testHeader);
 
-            if (option == 9)
-                std::cout << testHeader;
+                if (option == 9)
+                    // Only need to write to console when testing all
+                    // because user doesn't know what test it is on
+                    std::cout << testHeader;
+            }
 
             switch (testOption)
             {
@@ -251,7 +256,7 @@ int main()
             double gops = ((((1024 * 1024 * 1024) / 1000000000.0)
                 / fastest) * (double)JOB_COUNT);
 
-            double phenom2 = phenom2_performance[(option - 1)
+            double phenom2 = phenom2_performance[(testOption - 1)
                 + (7 * (threadCount == 1))];
 
             std::string instructions = "Executed " + std::to_string(gops) + " billion instructions/second\n";
@@ -260,6 +265,7 @@ int main()
             std::cout << instructions;
             std::cout << score;
 
+            // Always write results to the file
             WriteResults(instructions);
             WriteResults(score);
         }
