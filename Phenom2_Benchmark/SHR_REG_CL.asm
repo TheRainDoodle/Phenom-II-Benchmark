@@ -1,14 +1,14 @@
 .code
 
 SHR_MACRO macro
-	shr rax, cl
-	shr rdx, cl
-	shr rdi, cl
-	shr rsi, cl
-	shr r11, cl
-	shr r8, cl
-	shr r9, cl
-	shr r10, cl
+	shr rax, 1
+	shr rdx, 1
+	shr rdi, 1
+	shr rsi, 1
+	shr r11, 1
+	shr r8, 1
+	shr r9, 1
+	shr r10, 1
 endm
 
 SHR_REG_CL proc
