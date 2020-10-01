@@ -84,6 +84,26 @@ int main()
 		1.0					// IMUL
 	};
 
+	double i7_6700hq_performance[] = {
+                // Multithreaded
+                49.86,                          // Add
+                49.97,                          // Bool
+                8.2782,                         // Shift CL
+                74.66,                          // MMX
+                25.12,                          // CMOVcc
+                204.6,                          // Flops
+                12.69,                          // IMUL
+                // Single threaded
+                13.45,                          // Add
+                13.43,                          // Bool
+                1.7,                            // Shift CL
+                27.23,                          // MMX
+                6.681,                          // CMOVcc
+                50.09,                          // Flops
+                3.398                           // IMUL
+        };
+
+
 	// Check for AVX capability
 	bool AVX_CAPABLE = GetAVXCapability();
 	bool SSE_CAPABLE = GetSSECapability();
@@ -104,7 +124,9 @@ int main()
 	std::cout<<"* * *  Welcome to How Many Phenom II's is My CPU!  * * *"<< std::endl;
 	std::cout<< std::endl;
 	std::cout<<"This benchmark will time your CPU performance against an"<< std::endl;
-	std::cout<<"AMD Quad Core Phenom II 810 from the year 2009."<< std::endl;
+	std::cout<<"4 Core AMD Phenom II 810 from the year 2009."<< std::endl;
+	std::cout<<"and an"<< std::endl;
+	std::cout<<"4 Core / 8 Threads Intel Core i7 6700HQ from 2016 ."<< std::endl;
 	std::cout<<std::endl;
 
 	if (AVX_CAPABLE)
@@ -116,7 +138,7 @@ int main()
 	else
 		std::cout<<"SSE capable CPU is required FLOPS test."<<std::endl;
 
-	std::cout<<"Threads available: "<< threadCount << " vs. 4 for Phenom II" << std::endl;
+	std::cout<<"Threads available: "<< threadCount;
 
 	while (option != 0)
 	{
@@ -211,8 +233,13 @@ int main()
 		double phenom2 = phenom2_performance[(option-1)
 		 + (7 * (threadCount == 1))];
 
+		double i76700hq = i7_6700hq_performance[(option-1)
+		 + (7 * (threadCount == 1))];
+
 		std::cout<<"Executed "<< gops << " billion instructions/second" <<std::endl;
-		std::cout<<	"Score: "<< (gops / phenom2) << " Phenom's II's worth's" << std::endl;
+		std::cout<<	"Scores: "<< std::endl;
+		std::cout<< (gops / phenom2) << " Phenom's II's worth's" << std::endl;
+		std::cout<< (gops / i76700hq) << " i7 6700 HQ's worth's" << std::endl;
 	}
 
 	std::cout<<"See ya... "<< std::endl;
