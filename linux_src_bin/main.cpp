@@ -3,6 +3,7 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include <stdio.h>
 
 // Checker function for AVX and SSE
 extern "C" bool GetAVXCapability();
@@ -84,6 +85,10 @@ int main()
 		1.0					// IMUL
 	};
 
+	// CSV file output
+	FILE * fp;
+  int i;
+	fp = fopen ("Output.csv","w");
 	// Check for AVX capability
 	bool AVX_CAPABLE = GetAVXCapability();
 	bool SSE_CAPABLE = GetSSECapability();
@@ -141,7 +146,7 @@ int main()
 			std::cout<<"0. Quit" << std::endl;
 
 			std::cin>>option;
-	
+
 			// Reset to -1 if the input is invalid
 			option = (option * (option >= 0 && option <= 8))
 				+ (-1 * !(option >= 0 && option <= 8));
@@ -199,7 +204,7 @@ int main()
 
 			// Output time for this run
 			std::cout<<"Run "<< (r+1) << "/" << RUNS <<" Time: "<< thisTime << std::endl;
-
+			fprintf (fp, "%f,",thisTime);
 			// Delete the threads
 			for (int i = 0; i < threadCount; i++)
 				delete t[i];
@@ -212,7 +217,10 @@ int main()
 		 + (7 * (threadCount == 1))];
 
 		std::cout<<"Executed "<< gops << " billion instructions/second" <<std::endl;
+		fprintf (fp, "%f,",gops);
 		std::cout<<	"Score: "<< (gops / phenom2) << " Phenom's II's worth's" << std::endl;
+		fprintf (fp, "%f,",(gops / phenom2));
+		fprintf (fp, "______,\n");
 	}
 
 	std::cout<<"See ya... "<< std::endl;
