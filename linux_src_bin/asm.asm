@@ -1,4 +1,3 @@
-//Include all x86-assemblies here...
 %include "./asm/x86/AND_REG_REG.asm"
 %include "./asm/x86/CMOVcc_REG_REG.asm"
 %include "./asm/x86/PADDB_MMX.asm"

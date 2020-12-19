@@ -53,3 +53,4 @@ PADDB_MMX:
 
 	emms		; Exit multimedia state, return to x87
 	ret
+
