@@ -4,6 +4,8 @@
 #include <mutex>
 #include <vector>
 
+#ifndef __aarch64__
+//Non ARM ... should be x86/x64
 // Checker function for AVX and SSE
 extern "C" bool GetAVXCapability();
 extern "C" bool GetSSECapability();
@@ -20,6 +22,16 @@ extern "C" void FLOPS_AVX(int threadID);
 
 // MUL added for Reirei
 extern "C" void IMUL_REG_REG(int threadID);
+#endif
+
+#ifdef __aarch64__
+//ARM-Equivalents
+extern "C" void ARM_ADD_REG_1(int threadID);
+extern "C" void ARM_AND_REG_REG(int threadID);
+extern "C" void ARM_SHR_REG_CL(int threadID);
+//extern "C" void ARM_PADDB_MMX(int threadID);
+//extern "C" void ARM_CMOVcc_REG_REG(int threadID);
+#endif
 
 // Lock for the jobs vector
 std::mutex workMutex;
@@ -84,9 +96,68 @@ int main()
 		1.0					// IMUL
 	};
 
+	double i7_6700hq_performance[] = {
+                // Multithreaded
+                49.86,                          // Add
+                49.97,                          // Bool
+                8.2782,                         // Shift CL
+                74.66,                          // MMX
+                25.12,                          // CMOVcc
+                204.6,                          // Flops
+                12.69,                          // IMUL
+                // Single threaded
+                13.45,                          // Add
+                13.43,                          // Bool
+                1.7,                            // Shift CL
+                27.23,                          // MMX
+                6.681,                          // CMOVcc
+                50.09,                          // Flops
+                3.398                           // IMUL
+        };
+
+	double n450_performance[] = {
+                // Multithreaded
+                3,168,
+                3.268,
+                1.667,
+                12.87,
+                1.657,
+                6.61,
+                0.2194,
+                // Single threaded
+                3.104,
+                3.25,
+                1.656,
+                12.81,
+                0.8292,
+                6.572,
+                0.1504
+        };
+
+	double pi4_performance[] = {
+                // Multithreaded
+                16.87,                          // Add
+                16.85,                          // Bool
+                15.01,                         // Shift x10
+                0.0,                          // MMX
+                0.0,                          // CMOVcc
+                0.0,                          // Flops
+                0.0,                          // IMUL
+                // Single threaded
+                4.217,                          // Add
+                4.216,                          // Bool
+                3.759,                            // Shift x10
+                0.0,                          // MMX
+                0.0,                          // CMOVcc
+                0.0,                          // Flops
+                0.0                           // IMUL
+        };
+
+#ifndef __aarch64__
 	// Check for AVX capability
 	bool AVX_CAPABLE = GetAVXCapability();
 	bool SSE_CAPABLE = GetSSECapability();
+#endif
 
 	// Limit output digits to 4
 	std::cout.precision(4);
@@ -101,12 +172,22 @@ int main()
 	void(*currentFunction)(int);	// Pointer to the currently selected function
 
 	// Output some info
-	std::cout<<"* * *  Welcome to How Many Phenom II's is My CPU!  * * *"<< std::endl;
+	std::cout<<"* * *  Welcome to How Many CPU's is My CPU! - ";
+#ifndef __aarch64__
+	std::cout<<"x86-Edition  * * *"<< std::endl;
+#endif
+#ifdef __aarch64__
+	std::cout<<"ARM64-Edition  * * *"<< std::endl;
+#endif
 	std::cout<< std::endl;
-	std::cout<<"This benchmark will time your CPU performance against an"<< std::endl;
-	std::cout<<"AMD Quad Core Phenom II 810 from the year 2009."<< std::endl;
+	std::cout<<"This benchmark will time your CPU performance against different CPUs:"<< std::endl;
+	std::cout<<"4 Core AMD Phenom II 810 from the year 2009."<< std::endl;	
+	std::cout<<"4 Core / 8 Threads Intel Core i7 6700HQ from 2016."<< std::endl;
+	std::cout<<"1 Core / 2 Threads Intel Atom N450 from 2010."<< std::endl;
+	std::cout<<"and a Raspberry Pi 4 overclocked @2.2GHz from 2019. (AARCH64 instead of x86!)"<< std::endl;
 	std::cout<<std::endl;
 
+#ifndef __aarch64__
 	if (AVX_CAPABLE)
 		std::cout<<"AVX CPU detected!"<< std::endl;
 	else
@@ -115,8 +196,9 @@ int main()
 		std::cout<<"SSE CPU detected!" << std::endl;
 	else
 		std::cout<<"SSE capable CPU is required FLOPS test."<<std::endl;
+#endif
 
-	std::cout<<"Threads available: "<< threadCount << " vs. 4 for Phenom II" << std::endl;
+	std::cout<<"Threads available: "<< threadCount;
 
 	while (option != 0)
 	{
@@ -130,13 +212,16 @@ int main()
 		{
 			std::cout<<std::endl;
 			std::cout<<"Select a benchmark (or 0 to quit): "<< std::endl;
-			std::cout<<"1. ADD REG, 1		(GPR arithmetic)" << std::endl;
-			std::cout<<"2. AND REG, REG		(GPR Boolean)" << std::endl;
-			std::cout<<"3. SHR REG, CL		(Variable shifts - Phenom's phorte)" << std::endl;
+			std::cout<<"1. ADD REG, 1	| add reg, reg, 1		(GPR arithmetic)" << std::endl;
+			std::cout<<"2. AND REG, REG	| and reg, reg, reg		(GPR Boolean)" << std::endl;
+			std::cout<<"3. SHR REG, CL	| lsr reg, reg, x9		(Variable shifts - Phenom's phorte)" << std::endl;
+#ifndef __aarch64__	
+//These tests don't exist for ARM (yet)
 			std::cout<<"4. PADDB MMX		(Obsolete instruction set)"<< std::endl;
 			std::cout<<"5. CMOVcc REG, REG	(Branchless programming)" << std::endl;
 			std::cout<<"6. FLOPS		(Floating point with best set)" << std::endl;
 			std::cout<<"7. IMUL REG, REG	(GPR Multiplication)"<< std::endl;
+#endif
 			std::cout<<"8. Toggle Multi vs. Single Threads (Current="<<threadCount<<")"<<std::endl;
 			std::cout<<"0. Quit" << std::endl;
 
@@ -147,18 +232,36 @@ int main()
 				+ (-1 * !(option >= 0 && option <= 8));
 		}
 
+
 		switch (option)
 		{
 		case 0: break;
-		case 1: currentFunction = ADD_REG_1; break;
-		case 2: currentFunction = AND_REG_REG; break;
-		case 3: currentFunction = SHR_REG_CL; break;
+#ifndef __aarch64__	
+		//X86-64-Options	
+		case 1: printf("OK. Running ADD-Test (x86). Please wait.\r\n"); currentFunction = ADD_REG_1; break;
+		case 2: printf("OK. Running AND-Test (x86). Please wait.\r\n");currentFunction = AND_REG_REG; break;
+		case 3: printf("OK. Running Shift-Test against CL (x86). Please wait.\r\n");currentFunction = SHR_REG_CL; break;
+		case 4: printf("OK. Running Obsolete-Instruction-Set-Test (x86). Please wait.\r\n"); currentFunction = PADDB_MMX; break;
+		case 5: printf("OK. Running CMOV-Test (x86). Please wait.\r\n"); currentFunction = CMOVcc_REG_REG; break;
+		case 6: printf("OK. Running FLOPS-Test (x86). Please wait.\r\n"); currentFunction = (void (*)(int))				// Select SSE or AVX
+			((unsigned long long)FLOPS_SSE * !AVX_CAPABLE +
+			(unsigned long long)FLOPS_AVX * AVX_CAPABLE); break;
+		case 7: printf("OK. Running GPR-Multiplication-Test (x86). Please wait.\r\n"); currentFunction = IMUL_REG_REG; break;
+#endif		
+
+#ifdef __aarch64__		
+		//ARM64-Options
+		case 1: printf("OK. Running ADD-Test (ARM). Please wait.\r\n"); currentFunction = ARM_ADD_REG_1; break;
+		case 2: printf("OK. Running AND-Test (ARM). Please wait.\r\n"); currentFunction = ARM_AND_REG_REG; break;
+		case 3: printf("OK. Running Shift-Test against x9 (ARM). Please wait.\r\n"); currentFunction = ARM_SHR_REG_CL; break;
+#endif
+		/*				
 		case 4: currentFunction = PADDB_MMX; break;
 		case 5: currentFunction = CMOVcc_REG_REG; break;
 		case 6: currentFunction = (void (*)(int))				// Select SSE or AVX
 			((unsigned long long)FLOPS_SSE * !AVX_CAPABLE +
 			(unsigned long long)FLOPS_AVX * AVX_CAPABLE); break;
-		case 7: currentFunction = IMUL_REG_REG; break;
+		case 7: currentFunction = IMUL_REG_REG; break;*/
 		case 8: threadCount = (1 * (threadCount != 1)) +		// Toggle threaded or single thread
 			(std::thread::hardware_concurrency() * (threadCount == 1)); break;
 		}
@@ -211,8 +314,24 @@ int main()
 		double phenom2 = phenom2_performance[(option-1)
 		 + (7 * (threadCount == 1))];
 
-		std::cout<<"Executed "<< gops << " billion instructions/second" <<std::endl;
-		std::cout<<	"Score: "<< (gops / phenom2) << " Phenom's II's worth's" << std::endl;
+		double i76700hq = i7_6700hq_performance[(option-1)
+		 + (7 * (threadCount == 1))];
+
+		double n450 = n450_performance[(option-1)
+                 + (7 * (threadCount == 1))];
+
+		double pi4 = pi4_performance[(option-1)
+		+ (7 * (threadCount == 1))];
+
+		std::cout<<	std::endl;
+		std::cout<< "* * * Your score is >>"<< gops << "<< billion instructions/second * * *" <<std::endl;
+		std::cout<<	std::endl;
+		std::cout<<	"Other CPU-Scores: "<< std::endl;
+		std::cout<< (gops / n450) << "x Intel Atom N450's worth's (" << n450 << " bI/s)" << std::endl;
+		std::cout<< (gops / pi4) << "x Raspberry Pi 4's worth's (" << pi4 << " bI/s)" << std::endl;
+		std::cout<< (gops / phenom2) << "x AMD Phenom's II's worth's (" << phenom2 << " bI/s)" << std::endl;
+		std::cout<< (gops / i76700hq) << "x Intel Core i7 6700 HQ's worth's (" << i76700hq << " bI/s)" << std::endl;
+		
 	}
 
 	std::cout<<"See ya... "<< std::endl;
