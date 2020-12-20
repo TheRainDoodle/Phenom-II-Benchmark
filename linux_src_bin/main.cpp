@@ -28,7 +28,7 @@ extern "C" void IMUL_REG_REG(int threadID);
 //ARM-Equivalents
 extern "C" void ARM_ADD_REG_1(int threadID);
 extern "C" void ARM_AND_REG_REG(int threadID);
-//extern "C" void ARM_SHR_REG_CL(int threadID);
+extern "C" void ARM_SHR_REG_CL(int threadID);
 //extern "C" void ARM_PADDB_MMX(int threadID);
 //extern "C" void ARM_CMOVcc_REG_REG(int threadID);
 #endif
@@ -138,7 +138,7 @@ int main()
                 // Multithreaded
                 16.87,                          // Add
                 16.85,                          // Bool
-                0.0,                         // Shift CL
+                15.01,                         // Shift x10
                 0.0,                          // MMX
                 0.0,                          // CMOVcc
                 0.0,                          // Flops
@@ -146,7 +146,7 @@ int main()
                 // Single threaded
                 4.217,                          // Add
                 4.216,                          // Bool
-                0.0,                            // Shift CL
+                3.759,                            // Shift x10
                 0.0,                          // MMX
                 0.0,                          // CMOVcc
                 0.0,                          // Flops
@@ -184,7 +184,7 @@ int main()
 	std::cout<<"4 Core AMD Phenom II 810 from the year 2009."<< std::endl;	
 	std::cout<<"4 Core / 8 Threads Intel Core i7 6700HQ from 2016."<< std::endl;
 	std::cout<<"1 Core / 2 Threads Intel Atom N450 from 2010."<< std::endl;
-	std::cout<<"and a Raspberry Pi 4 overclocked @2.2GHz from 2019. (Caution: this one has a different architecture => AARCH64 instead of x86!)"<< std::endl;
+	std::cout<<"and a Raspberry Pi 4 overclocked @2.2GHz from 2019. (AARCH64 instead of x86!)"<< std::endl;
 	std::cout<<std::endl;
 
 #ifndef __aarch64__
@@ -212,11 +212,11 @@ int main()
 		{
 			std::cout<<std::endl;
 			std::cout<<"Select a benchmark (or 0 to quit): "<< std::endl;
-			std::cout<<"1. ADD REG, 1		(GPR arithmetic)" << std::endl;
-			std::cout<<"2. AND REG, REG		(GPR Boolean)" << std::endl;
+			std::cout<<"1. ADD REG, 1	| add reg, reg, 1		(GPR arithmetic)" << std::endl;
+			std::cout<<"2. AND REG, REG	| and reg, reg, reg		(GPR Boolean)" << std::endl;
+			std::cout<<"3. SHR REG, CL	| lsr reg, reg, x9		(Variable shifts - Phenom's phorte)" << std::endl;
 #ifndef __aarch64__	
-//These test don't exist for ARM (yet)
-			std::cout<<"3. SHR REG, CL		(Variable shifts - Phenom's phorte)" << std::endl;
+//These tests don't exist for ARM (yet)
 			std::cout<<"4. PADDB MMX		(Obsolete instruction set)"<< std::endl;
 			std::cout<<"5. CMOVcc REG, REG	(Branchless programming)" << std::endl;
 			std::cout<<"6. FLOPS		(Floating point with best set)" << std::endl;
@@ -240,7 +240,7 @@ int main()
 		//X86-64-Options	
 		case 1: printf("OK. Running ADD-Test (x86). Please wait.\r\n"); currentFunction = ADD_REG_1; break;
 		case 2: printf("OK. Running AND-Test (x86). Please wait.\r\n");currentFunction = AND_REG_REG; break;
-		case 3: printf("OK. Running Shift-Test (x86). Please wait.\r\n");currentFunction = SHR_REG_CL; break;
+		case 3: printf("OK. Running Shift-Test against CL (x86). Please wait.\r\n");currentFunction = SHR_REG_CL; break;
 		case 4: printf("OK. Running Obsolete-Instruction-Set-Test (x86). Please wait.\r\n"); currentFunction = PADDB_MMX; break;
 		case 5: printf("OK. Running CMOV-Test (x86). Please wait.\r\n"); currentFunction = CMOVcc_REG_REG; break;
 		case 6: printf("OK. Running FLOPS-Test (x86). Please wait.\r\n"); currentFunction = (void (*)(int))				// Select SSE or AVX
@@ -250,13 +250,12 @@ int main()
 #endif		
 
 #ifdef __aarch64__		
-		//ARM-Options
+		//ARM64-Options
 		case 1: printf("OK. Running ADD-Test (ARM). Please wait.\r\n"); currentFunction = ARM_ADD_REG_1; break;
 		case 2: printf("OK. Running AND-Test (ARM). Please wait.\r\n"); currentFunction = ARM_AND_REG_REG; break;
+		case 3: printf("OK. Running Shift-Test against x9 (ARM). Please wait.\r\n"); currentFunction = ARM_SHR_REG_CL; break;
 #endif
-		/*
-		case 2: currentFunction = AND_REG_REG; break;
-		case 3: currentFunction = SHR_REG_CL; break;
+		/*				
 		case 4: currentFunction = PADDB_MMX; break;
 		case 5: currentFunction = CMOVcc_REG_REG; break;
 		case 6: currentFunction = (void (*)(int))				// Select SSE or AVX
@@ -324,12 +323,14 @@ int main()
 		double pi4 = pi4_performance[(option-1)
 		+ (7 * (threadCount == 1))];
 
-		std::cout<<"Executed "<< gops << " billion instructions/second" <<std::endl;
-		std::cout<<	"Scores: "<< std::endl;
-		std::cout<< (gops / n450) << " Intel Atom N450's worth's" << std::endl;
-		std::cout<< (gops / pi4) << " Raspberry Pi 4's worth's" << std::endl;
-		std::cout<< (gops / phenom2) << " AMD Phenom's II's worth's" << std::endl;
-		std::cout<< (gops / i76700hq) << " Intel Core i7 6700 HQ's worth's" << std::endl;
+		std::cout<<	std::endl;
+		std::cout<< "* * * Your score is >>"<< gops << "<< billion instructions/second * * *" <<std::endl;
+		std::cout<<	std::endl;
+		std::cout<<	"Other CPU-Scores: "<< std::endl;
+		std::cout<< (gops / n450) << "x Intel Atom N450's worth's (" << n450 << " bI/s)" << std::endl;
+		std::cout<< (gops / pi4) << "x Raspberry Pi 4's worth's (" << pi4 << " bI/s)" << std::endl;
+		std::cout<< (gops / phenom2) << "x AMD Phenom's II's worth's (" << phenom2 << " bI/s)" << std::endl;
+		std::cout<< (gops / i76700hq) << "x Intel Core i7 6700 HQ's worth's (" << i76700hq << " bI/s)" << std::endl;
 		
 	}
 
