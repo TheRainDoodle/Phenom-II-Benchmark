@@ -1,4 +1,20 @@
 .code
+; Checks CPUID for AVX512 capability
+GetAVX512Capability proc
+	push rbx
+	
+	mov eax, 7
+	xor ecx, ecx
+	cpuid
+
+	mov eax, ebx
+	shr eax, 16		; Read bit 16
+	and eax, 1
+
+	pop rbx
+	ret
+GetAVX512Capability endp
+
 ; Checks CPUID for AVX capability
 GetAVXCapability proc
 	push rbx
@@ -16,7 +32,7 @@ GetAVXCapability endp
 
 ; Checks CPUID for SSE capability
 GetSSECapability proc
-		push rbx
+	push rbx
 	
 	mov eax, 1
 	cpuid

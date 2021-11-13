@@ -5,6 +5,7 @@
 #include <vector>
 
 // Checker function for AVX and SSE
+extern "C" bool GetAVX512Capability();
 extern "C" bool GetAVXCapability();
 extern "C" bool GetSSECapability();
 
@@ -17,6 +18,7 @@ extern "C" void PADDB_MMX(int threadID);
 extern "C" void CMOVcc_REG_REG(int threadID);
 extern "C" void FLOPS_SSE(int threadID);
 extern "C" void FLOPS_AVX(int threadID);
+extern "C" void FLOPS_AVX512(int threadID);
 
 // MUL added for Reirei
 extern "C" void IMUL_REG_REG(int threadID);
@@ -85,6 +87,7 @@ int main()
 	};
 
 	// Check for AVX and SSE capability
+	bool AVX512_CAPABLE = GetAVX512Capability();
 	bool AVX_CAPABLE = GetAVXCapability();
 	bool SSE_CAPABLE = GetSSECapability();
 
@@ -107,6 +110,10 @@ int main()
 	std::cout<<"AMD Quad Core Phenom II 810 from the year 2009."<< std::endl;
 	std::cout<<std::endl;
 
+	if (AVX512_CAPABLE)
+		std::cout << "AVX512 CPU detected!" << std::endl;
+	else
+		std::cout << "No AVX512 support detected" << std::endl;
 	if (AVX_CAPABLE)
 		std::cout<<"AVX CPU detected!"<< std::endl;
 	else
@@ -155,9 +162,7 @@ int main()
 		case 3: currentFunction = SHR_REG_CL; break;
 		case 4: currentFunction = PADDB_MMX; break;
 		case 5: currentFunction = CMOVcc_REG_REG; break;
-		case 6: currentFunction = (void (*)(int))				// Select SSE or AVX
-			((unsigned long long)FLOPS_SSE * !AVX_CAPABLE +
-			(unsigned long long)FLOPS_AVX * AVX_CAPABLE); break;
+		case 6: currentFunction = (AVX512_CAPABLE ? FLOPS_AVX512 : (AVX_CAPABLE ? FLOPS_AVX : FLOPS_SSE)); break;
 		case 7: currentFunction = IMUL_REG_REG; break;
 		case 8: threadCount = (1 * (threadCount != 1)) +		// Toggle threaded or single thread
 			(std::thread::hardware_concurrency() * (threadCount == 1)); break;
