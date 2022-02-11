@@ -148,13 +148,13 @@ int main()
 			std::cout<<"7. FLOPS Best		(Floating point with best set)" << std::endl;
 			std::cout<<"8. IMUL REG, REG	(GPR Multiplication)"<< std::endl;
 			std::cout<<"9. Toggle Multi vs. Single Threads (Current="<<threadCount<<")"<<std::endl;
+			std::cout<<"10. Set thread count to match Phenom (4)" << std::endl;
 			std::cout<<"0. Quit" << std::endl;
 
 			std::cin>>option;
 
 			// Reset to -1 if the input is invalid
-			option = (option * (option >= 0 && option <= 8))
-				+ (-1 * !(option >= 0 && option <= 8));
+			option = (option * (option >= 0 && option <= 10))+(-1 * !(option >= 0 && option <= 10));
 		}
 
 		switch (option)
@@ -170,11 +170,13 @@ int main()
 		case 8: currentFunction = IMUL_REG_REG; break;
 		case 9: threadCount = (1 * (threadCount != 1)) +		// Toggle threaded or single thread
 			(std::thread::hardware_concurrency() * (threadCount == 1)); break;
+		case 10: threadCount = 4; break; // set Thread count to be the same as the Phenom 820
+
 		}
 
 		if (option == 0)	// Allow quit
 			break;
-		if (option == 9)	// Continue if the thread count has been changed
+		if (option == 9 || option == 10)	// Continue if the thread count has been changed
 			continue;
 
 		// Loop RUNS times through the benchmark
