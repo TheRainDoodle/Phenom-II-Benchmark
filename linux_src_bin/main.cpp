@@ -75,6 +75,7 @@ int main()
 		82.588283,			// MMX
 		30.091751,			// CMOVcc
 		41.371507,			// Flops
+		41.371507,			// Flops
 		1.0,				// IMUL
 		// Single threaded
 		7.5403567,			// Add
@@ -83,7 +84,8 @@ int main()
 		20.704509,			// MMX
 		7.5366694,			// CMOVcc
 		10.36873,			// Flops
-		1.0					// IMUL
+		10.36873,			// Flops
+		1.0				// IMUL
 	};
 
 	// Check for AVX capability
@@ -142,13 +144,14 @@ int main()
 			std::cout<<"3. SHR REG, CL		(Variable shifts - Phenom's phorte)" << std::endl;
 			std::cout<<"4. PADDB MMX		(Obsolete instruction set)"<< std::endl;
 			std::cout<<"5. CMOVcc REG, REG	(Branchless programming)" << std::endl;
-			std::cout<<"6. FLOPS		(Floating point with best set)" << std::endl;
-			std::cout<<"7. IMUL REG, REG	(GPR Multiplication)"<< std::endl;
-			std::cout<<"8. Toggle Multi vs. Single Threads (Current="<<threadCount<<")"<<std::endl;
+			std::cout<<"6. FLOPS SSE		(Floating point with SSE)" << std::endl;
+			std::cout<<"7. FLOPS Best		(Floating point with best set)" << std::endl;
+			std::cout<<"8. IMUL REG, REG	(GPR Multiplication)"<< std::endl;
+			std::cout<<"9. Toggle Multi vs. Single Threads (Current="<<threadCount<<")"<<std::endl;
 			std::cout<<"0. Quit" << std::endl;
 
 			std::cin>>option;
-	
+
 			// Reset to -1 if the input is invalid
 			option = (option * (option >= 0 && option <= 8))
 				+ (-1 * !(option >= 0 && option <= 8));
@@ -162,15 +165,16 @@ int main()
 		case 3: currentFunction = SHR_REG_CL; break;
 		case 4: currentFunction = PADDB_MMX; break;
 		case 5: currentFunction = CMOVcc_REG_REG; break;
-		case 6: currentFunction = (AVX512_CAPABLE ? FLOPS_AVX512 : (AVX_CAPABLE ? FLOPS_AVX : FLOPS_SSE)); break;				// Select SSE, AVX or AVX512
-		case 7: currentFunction = IMUL_REG_REG; break;
-		case 8: threadCount = (1 * (threadCount != 1)) +		// Toggle threaded or single thread
+		case 6: currentFunction = FLOPS_SSE; break;
+		case 7: currentFunction =  (AVX512_CAPABLE ? FLOPS_AVX512 : (AVX_CAPABLE ? FLOPS_AVX : FLOPS_SSE)); break;	// Select SSE, AVX or AVX512
+		case 8: currentFunction = IMUL_REG_REG; break;
+		case 9: threadCount = (1 * (threadCount != 1)) +		// Toggle threaded or single thread
 			(std::thread::hardware_concurrency() * (threadCount == 1)); break;
 		}
 
 		if (option == 0)	// Allow quit
 			break;
-		if (option == 8)	// Continue if the thread count has been changed
+		if (option == 9)	// Continue if the thread count has been changed
 			continue;
 
 		// Loop RUNS times through the benchmark
