@@ -81,3 +81,34 @@ From my testing:
     Score: 3.933 Phenom's II's worth's
 
 
+    
+4 cores, no hyper threading, SSE instruction:
+	Run 1/10 Time: 0.6646
+	Run 2/10 Time: 0.6583
+	Run 3/10 Time: 0.66
+	Run 4/10 Time: 0.6585
+	Run 5/10 Time: 0.6597
+	Run 6/10 Time: 0.6586
+	Run 7/10 Time: 0.659
+	Run 8/10 Time: 0.6591
+	Run 9/10 Time: 0.6583
+	Run 10/10 Time: 0.6586
+	Executed 163.1 billion instructions/second
+
+1 core, no hyper threading, AVX512 instructions: 
+	Run 1/10 Time: 0.7091
+	Run 2/10 Time: 0.6858
+	Run 3/10 Time: 0.6911
+	Run 4/10 Time: 0.6855
+	Run 5/10 Time: 0.6861
+	Run 6/10 Time: 0.6853
+	Run 7/10 Time: 0.6893
+	Run 8/10 Time: 0.6856
+	Run 9/10 Time: 0.686
+	Run 10/10 Time: 0.6855
+	Executed 156.7 billion instructions/second
+
+
+
+
+    
