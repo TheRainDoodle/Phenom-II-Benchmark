@@ -5,6 +5,7 @@
 #include <vector>
 
 // Checker function for AVX and SSE
+extern "C" bool GetVMXCapability();
 extern "C" bool GetAVX512Capability();
 extern "C" bool GetAVXCapability();
 extern "C" bool GetSSECapability();
@@ -14,6 +15,7 @@ extern "C" bool GetSSECapability();
 extern "C" void ADD_REG_1(int threadID);
 extern "C" void AND_REG_REG(int threadID);
 extern "C" void SHR_REG_CL(int threadID);
+extern "C" void SHR_REG_CL_AVX_512(int threadID);
 extern "C" void PADDB_MMX(int threadID);
 extern "C" void CMOVcc_REG_REG(int threadID);
 extern "C" void FLOPS_SSE(int threadID);
@@ -88,7 +90,8 @@ int main()
 		1.0				// IMUL
 	};
 
-	// Check for AVX capability
+	// Check for CPU capabilities
+	bool VMX_CAPABLE = GetVMXCapability();
 	bool AVX512_CAPABLE = GetAVX512Capability();
 	bool AVX_CAPABLE = GetAVXCapability();
 	bool SSE_CAPABLE = GetSSECapability();
@@ -112,10 +115,12 @@ int main()
 	std::cout<<"AMD Quad Core Phenom II 810 from the year 2009."<< std::endl;
 	std::cout<<std::endl;
 
+	if (VMX_CAPABLE)
+		std::cout<<"VMX CPU detected!"<< std::endl;
 	if (AVX512_CAPABLE)
-		std::cout<<"AVX512 CPU detected!"<< std::endl;
+		std::cout<<"AVX512 CPU detected!  We'll use it for FLOPS and SHR"<< std::endl;
 	else
-		std::cout<<"No AVX512 support detected" << std::endl;
+		std::cout<<"No AVX512 support detected!" << std::endl;
 	if (AVX_CAPABLE)
 		std::cout<<"AVX CPU detected!"<< std::endl;
 	else
@@ -141,7 +146,7 @@ int main()
 			std::cout<<"Select a benchmark (or 0 to quit): "<< std::endl;
 			std::cout<<"1. ADD REG, 1		(GPR arithmetic)" << std::endl;
 			std::cout<<"2. AND REG, REG		(GPR Boolean)" << std::endl;
-			std::cout<<"3. SHR REG, CL		(Variable shifts - Phenom's phorte)" << std::endl;
+			std::cout<<"3. SHR REG, CL		(Variable shifts - Phenom's phorte)"<< std::endl; 
 			std::cout<<"4. PADDB MMX		(Obsolete instruction set)"<< std::endl;
 			std::cout<<"5. CMOVcc REG, REG	(Branchless programming)" << std::endl;
 			std::cout<<"6. FLOPS SSE		(Floating point with SSE)" << std::endl;
@@ -162,7 +167,7 @@ int main()
 		case 0: break;
 		case 1: currentFunction = ADD_REG_1; break;
 		case 2: currentFunction = AND_REG_REG; break;
-		case 3: currentFunction = SHR_REG_CL; break;
+		case 3: currentFunction = (AVX512_CAPABLE ? SHR_REG_CL_AVX_512: SHR_REG_CL); break;
 		case 4: currentFunction = PADDB_MMX; break;
 		case 5: currentFunction = CMOVcc_REG_REG; break;
 		case 6: currentFunction = FLOPS_SSE; break;
