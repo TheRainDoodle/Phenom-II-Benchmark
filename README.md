@@ -14,7 +14,7 @@ The Original forked code by Chris Creel did not support AVX512. They've been bee
 From my testing:
 
 
-    
+    ```
     Performance metrics on AVX-512 enabled alderlake:
     
     8 P-cores/16threads of AVX-512 :
@@ -46,10 +46,12 @@ From my testing:
     Run 10/10 Time: 0.6852
     Executed 156.7 billion instructions/second
     Score: 15.11 Phenom's II's worth's
-
     ```
-    When using sse for direct comparison 
+
+When using sse for direct comparison 
     
+    
+    ```
     8 P-cores/16threads of SSE :
 
     Run 1/10 Time: 0.3256
@@ -80,9 +82,8 @@ From my testing:
     Executed 40.78 billion instructions/second
     Score: 3.933 Phenom's II's worth's
 
-
-    
-4 cores, no hyper threading, SSE instruction:
+```
+    4 cores, no hyper threading, SSE instruction:
 	Run 1/10 Time: 0.6646
 	Run 2/10 Time: 0.6583
 	Run 3/10 Time: 0.66
@@ -107,8 +108,5 @@ From my testing:
 	Run 9/10 Time: 0.686
 	Run 10/10 Time: 0.6855
 	Executed 156.7 billion instructions/second
-
-
-
-
     
+```
