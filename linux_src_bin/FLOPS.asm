@@ -98,7 +98,7 @@ FLOPS_AVX:
 	push r10
 	push r12
 
-	mov r12, (1024*1024*1024)/(128 * 8)		; x8 for AVX
+	mov r12, (1024*1024*1024)/(128 * 8)		; x8 for AVX2
 
 	; Set all the AVX regs to 0.0
 	vxorps ymm0, ymm0, ymm0
@@ -200,3 +200,4 @@ FLOPS_AVX512:
 	pop rdi
 	pop rbx
 	ret
+
