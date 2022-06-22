@@ -26,6 +26,16 @@ section .text
 	vaddps ymm6, ymm6, ymm0
 	vaddps ymm7, ymm7, ymm0
 	vaddps ymm8, ymm8, ymm0
+	vaddps ymm9, ymm9, ymm0
+	vaddps ymm10, ymm10, ymm0
+	vaddps ymm11, ymm11, ymm0
+	vaddps ymm12, ymm12, ymm0
+	vaddps ymm13, ymm13, ymm0
+	vaddps ymm14, ymm14, ymm0
+	vaddps ymm15, ymm15, ymm0
+
+
+		
 %endmacro;
 
 
@@ -39,6 +49,30 @@ section .text
 	vaddps zmm6, zmm6, zmm0
 	vaddps zmm7, zmm7, zmm0
 	vaddps zmm8, zmm8, zmm0
+	vaddps zmm9, zmm9, zmm0
+	vaddps zmm10, zmm10, zmm0
+	vaddps zmm11, zmm11, zmm0
+	vaddps zmm12, zmm12, zmm0
+	vaddps zmm13, zmm13, zmm0
+	vaddps zmm14, zmm14, zmm0
+	vaddps zmm15, zmm15, zmm0
+	vaddps zmm16, zmm16, zmm0
+	vaddps zmm17, zmm17, zmm0
+	vaddps zmm18, zmm18, zmm0
+	vaddps zmm19, zmm19, zmm0
+	vaddps zmm20, zmm20, zmm0
+	vaddps zmm21, zmm21, zmm0
+	vaddps zmm22, zmm22, zmm0
+	vaddps zmm23, zmm23, zmm0
+	vaddps zmm24, zmm24, zmm0
+	vaddps zmm25, zmm25, zmm0
+	vaddps zmm26, zmm26, zmm0
+	vaddps zmm27, zmm27, zmm0
+	vaddps zmm28, zmm28, zmm0
+	vaddps zmm29, zmm29, zmm0
+	vaddps zmm30, zmm30, zmm0
+	vaddps zmm31, zmm31, zmm0
+
 %endmacro
 
 FLOPS_SSE:
@@ -110,16 +144,16 @@ FLOPS_AVX:
 	vxorps ymm6, ymm6, ymm6
 	vxorps ymm7, ymm7, ymm7
 	vxorps ymm8, ymm8, ymm8
+	vxorps ymm9, ymm9, ymm9
+	vxorps ymm10, ymm10, ymm10
+	vxorps ymm11, ymm11, ymm11
+	vxorps ymm12, ymm12, ymm12
+	vxorps ymm13, ymm13, ymm13
+	vxorps ymm14, ymm14, ymm14
+	vxorps ymm15, ymm15, ymm15
+
 
 .LoopHead:
-	ADD_AVX
-	ADD_AVX
-	ADD_AVX
-	ADD_AVX
-	ADD_AVX
-	ADD_AVX
-	ADD_AVX
-	ADD_AVX
 	ADD_AVX
 	ADD_AVX
 	ADD_AVX
@@ -168,20 +202,32 @@ FLOPS_AVX512:
 	vxorps zmm6, zmm6, zmm6
 	vxorps zmm7, zmm7, zmm7
 	vxorps zmm8, zmm8, zmm8
+	vxorps zmm9, zmm9, zmm9
+	vxorps zmm10, zmm10, zmm10
+	vxorps zmm11, zmm11, zmm11
+	vxorps zmm12, zmm12, zmm12
+	vxorps zmm13, zmm13, zmm13
+	vxorps zmm14, zmm14, zmm14
+	vxorps zmm15, zmm15, zmm15
+	vxorps zmm16, zmm16, zmm16
+	vxorps zmm17, zmm17, zmm17
+	vxorps zmm18, zmm18, zmm18
+	vxorps zmm19, zmm19, zmm19
+	vxorps zmm20, zmm20, zmm20
+	vxorps zmm21, zmm21, zmm21
+	vxorps zmm22, zmm22, zmm22
+	vxorps zmm23, zmm23, zmm23
+	vxorps zmm24, zmm24, zmm24
+	vxorps zmm25, zmm25, zmm25
+	vxorps zmm26, zmm26, zmm26
+	vxorps zmm27, zmm27, zmm27
+	vxorps zmm28, zmm28, zmm28
+	vxorps zmm29, zmm29, zmm29
+	vxorps zmm30, zmm30, zmm30
+	vxorps zmm31, zmm31, zmm31
+
 
 .LoopHead:
-	ADD_AVX512
-	ADD_AVX512
-	ADD_AVX512
-	ADD_AVX512
-	ADD_AVX512
-	ADD_AVX512
-	ADD_AVX512
-	ADD_AVX512
-	ADD_AVX512
-	ADD_AVX512
-	ADD_AVX512
-	ADD_AVX512
 	ADD_AVX512
 	ADD_AVX512
 	ADD_AVX512

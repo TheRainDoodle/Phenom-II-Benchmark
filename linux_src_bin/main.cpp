@@ -99,7 +99,7 @@ int main()
 	// Limit output digits to 4
 	std::cout.precision(4);
 
-	const int RUNS = 10;			// Repeitions, so we can find a fast time
+	const int RUNS = 50;			// Repeitions, so we can find a fast time
 	const int MAX_THREADS = 64;		// Maximum number of threads
 	const int JOB_COUNT = 100;		// Jobs to perform (threads keep checking until all jobs are done)
 	int threadCount = std::thread::hardware_concurrency();			// Actual thread count of this CPU
