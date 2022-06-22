@@ -15,7 +15,7 @@ If testing flops: run option 6 (sse) vs option 7(best ISA available, typically A
 ## Context
 Small set of low level benchmarks for testing hardware speed against a Phenom II 810 Quad Core from 2009.
 
-The benchmarks use all threads and cores of a CPU, and execute 100 billion iterations of some specific instruction using heavily unrolled loops for pipelining. The program has the timings from an old Phenom II 810 for each of the benchmarks, and prints out how many Phenom II's your CPU is, i.e. how much faster than a Phenom II the hardware is. A score of 2 Phenom II's means your hardware executed the instructions twice as fast.
+The benchmarks use all threads and cores of a CPU, and execute a few hundered billion iterations of some specific instruction using heavily unrolled loops for pipelining. The program has the timings from an old Phenom II 810 for each of the benchmarks, and prints out how many Phenom II's your CPU is, i.e. how much faster than a Phenom II the hardware is. A score of 2 Phenom II's means your hardware executed the instructions twice as fast.
 
 The aim of this project is to highlight some of the nuances in the speed of hardware. And show, while hardware is generally improving in speed, there are some things old hardware does as fast or faster. Having forked this repository, I compared the Phenom to my current workstation, an AVX-512 enabled Alder Lake 12th-gen system with 8-cores and 16-threads.
 
