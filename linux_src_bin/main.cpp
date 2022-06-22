@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include <ctime>
 #include <thread>
 #include <mutex>
@@ -30,6 +31,22 @@ std::mutex workMutex;
 
 // Jobs vector
 std::vector< void(*)(int) > work;
+
+void printHelp(const int threadCount)
+{
+        std::cout<<"1. ADD REG, 1		(GPR arithmetic)" << std::endl;
+        std::cout<<"2. AND REG, REG		(GPR Boolean)" << std::endl;
+        std::cout<<"3. SHR REG, CL		(Variable shifts - Phenom's phorte)"<< std::endl; 
+        std::cout<<"4. PADDB MMX		(Obsolete instruction set)"<< std::endl;
+        std::cout<<"5. CMOVcc REG, REG	(Branchless programming)" << std::endl;
+        std::cout<<"6. FLOPS SSE		(Floating point with SSE)" << std::endl;
+        std::cout<<"7. FLOPS Best		(Floating point with best set)" << std::endl;
+        std::cout<<"8. IMUL REG, REG	(GPR Multiplication)"<< std::endl;
+        std::cout<<"9. Toggle Multi vs. Single Threads (Current="<<threadCount<<")"<<std::endl;
+        std::cout<<"10. Set thread count to match Phenom (4)" << std::endl;
+        std::cout<<"11. Print this help" << std::endl;
+        std::cout<<"0. Quit" << std::endl;
+}
 
 void Execute(int threadID)
 {
@@ -107,6 +124,7 @@ int main()
 	int option = -1;				// Option variable for use input
 	double fastest = 0.0;			// Record of the fastest time recorded
 	void(*currentFunction)(int);	// Pointer to the currently selected function
+        bool has_run = false;
 
 	// Output some info
 	std::cout<<"* * *  Welcome to A 'Phenom'inal benchmark!  * * *"<< std::endl;
@@ -143,23 +161,16 @@ int main()
 		while (option == -1)
 		{
 			std::cout<<std::endl;
-			std::cout<<"Select a benchmark (or 0 to quit): "<< std::endl;
-			std::cout<<"1. ADD REG, 1		(GPR arithmetic)" << std::endl;
-			std::cout<<"2. AND REG, REG		(GPR Boolean)" << std::endl;
-			std::cout<<"3. SHR REG, CL		(Variable shifts - Phenom's phorte)"<< std::endl; 
-			std::cout<<"4. PADDB MMX		(Obsolete instruction set)"<< std::endl;
-			std::cout<<"5. CMOVcc REG, REG	(Branchless programming)" << std::endl;
-			std::cout<<"6. FLOPS SSE		(Floating point with SSE)" << std::endl;
-			std::cout<<"7. FLOPS Best		(Floating point with best set)" << std::endl;
-			std::cout<<"8. IMUL REG, REG	(GPR Multiplication)"<< std::endl;
-			std::cout<<"9. Toggle Multi vs. Single Threads (Current="<<threadCount<<")"<<std::endl;
-			std::cout<<"10. Set thread count to match Phenom (4)" << std::endl;
-			std::cout<<"0. Quit" << std::endl;
+			std::cout<<"Select a benchmark (0 to quit, 11 for help): "<< std::endl;
+                        if (!has_run) {
+                                printHelp(threadCount);
+                                has_run = true;
+                        }
 
 			std::cin>>option;
 
 			// Reset to -1 if the input is invalid
-			option = (option * (option >= 0 && option <= 10))+(-1 * !(option >= 0 && option <= 10));
+			option = (option * (option >= 0 && option <= 11))+(-1 * !(option >= 0 && option <= 11));
 		}
 
 		switch (option)
@@ -176,13 +187,19 @@ int main()
 		case 9: threadCount = (1 * (threadCount != 1)) +		// Toggle threaded or single thread
 			(std::thread::hardware_concurrency() * (threadCount == 1)); break;
 		case 10: threadCount = 4; break; // set Thread count to be the same as the Phenom 820
+                case 11: printHelp(threadCount); break;
 
 		}
 
 		if (option == 0)	// Allow quit
 			break;
-		if (option == 9 || option == 10)	// Continue if the thread count has been changed
+		if (option == 9 || option == 10 || option == 11)	// Continue if the thread count has been changed
 			continue;
+
+                // Store time of each runs
+                double clockedTimes[RUNS];
+
+                std::cout << "Running benchmark..." << std::endl;
 
 		// Loop RUNS times through the benchmark
 		for (int r = 0; r < RUNS; r++)
@@ -209,17 +226,29 @@ int main()
 			double thisTime = (double)(finishTime - startTime) / CLOCKS_PER_SEC;
 			thisTime /= (double)threadCount;	// ctime's clock seems to sum times of each thread
 
+                        clockedTimes[r] = thisTime;
+
 			// Update fastest if this time beat it
 			if (thisTime < fastest || fastest == 0.0)
 				fastest = thisTime;
-
-			// Output time for this run
-			std::cout<<"Run "<< (r+1) << "/" << RUNS <<" Time: "<< thisTime << std::endl;
 
 			// Delete the threads
 			for (int i = 0; i < threadCount; i++)
 				delete t[i];
 		}
+
+                // Compute average time per run
+                double avgTime = 0.0;
+                for (size_t i = 0; i < RUNS; ++i)
+                        avgTime += clockedTimes[i];
+                avgTime /= (double)(RUNS);
+
+                // Compute standard deviation of time per run
+                double stddevTime = 0.0;
+                for (size_t i = 0; i < RUNS; ++i)
+                        stddevTime += (clockedTimes[i] - avgTime) * (clockedTimes[i] - avgTime);
+                stddevTime /= (double)(RUNS - 1);
+                stddevTime = sqrt(stddevTime);
 
 		double gops = ((((1024*1024*1024)/1000000000.0)
 			/ fastest) * (double)JOB_COUNT);
@@ -227,6 +256,7 @@ int main()
 		double phenom2 = phenom2_performance[(option-1)
 		 + (7 * (threadCount == 1))];
 
+                std::cout << "Average time per run: " << avgTime << "s +/- " << stddevTime << "s" << std::endl;
 		std::cout<<"Executed "<< gops << " billion instructions/second" <<std::endl;
 		std::cout<<	"Score: "<< (gops / phenom2) << " Phenom's II's worth's" << std::endl;
 	}
