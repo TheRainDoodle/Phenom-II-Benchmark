@@ -1,5 +1,18 @@
 # A-*Phenominal*-benchmark
 
+## TLDR; 
+
+```
+git clone 
+cd linux_src_bin 
+make -B
+```
+Then run the application 
+
+If testing flops: run option 6 (sse) vs option 7(best ISA available, typically AVX1/2 or AVX512)
+
+
+## Context
 Small set of low level benchmarks for testing hardware speed against a Phenom II 810 Quad Core from 2009.
 
 The benchmarks use all threads and cores of a CPU, and execute 100 billion iterations of some specific instruction using heavily unrolled loops for pipelining. The program has the timings from an old Phenom II 810 for each of the benchmarks, and prints out how many Phenom II's your CPU is, i.e. how much faster than a Phenom II the hardware is. A score of 2 Phenom II's means your hardware executed the instructions twice as fast.
