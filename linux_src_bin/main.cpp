@@ -127,7 +127,7 @@ int main()
     std::thread* t[MAX_THREADS];                           // 16 is the maximum number of threads
     int option = -1;                                       // Option variable for use input
     double fastest = 0.0;                                  // Record of the fastest time recorded
-    void (*currentFunction)(int); // Pointer to the currently selected function
+    void (*currentFunction)(int) = nullptr; // Pointer to the currently selected function
     bool has_run = false;
 
     // Output some info
