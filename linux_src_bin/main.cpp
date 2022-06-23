@@ -90,23 +90,25 @@ int main()
 {
     double phenom2_performance[] = {
         // Multithreaded
-        30.099969, // Add
-        30.564951, // Bool
-        30.106989, // Shift CL
-        82.588283, // MMX
-        30.091751, // CMOVcc
-        41.371507, // Flops
-        41.371507, // Flops
-        1.0,       // IMUL
+        30.099969, // 1. Add
+        30.564951, // 2. Bool
+        30.106989, // 3. Shift CL
+        82.588283, // 4. MMX
+        30.091751, // 5. CMOVcc
+        41.371507, // 6. Flops
+        41.371507, // 7. Flops
+        41.371507, // 8. Flops
+        1.0,       // 9. IMUL
         // Single threaded
-        7.5403567, // Add
-        7.6557838, // Bool
-        7.5400756, // Shift CL
-        20.704509, // MMX
-        7.5366694, // CMOVcc
-        10.36873,  // Flops
-        10.36873,  // Flops
-        1.0        // IMUL
+        7.5403567, // 1. Add
+        7.6557838, // 2. Bool
+        7.5400756, // 3. Shift CL
+        20.704509, // 4. MMX
+        7.5366694, // 5. CMOVcc
+        10.36873,  // 6. Flops
+        10.36873,  // 7. Flops
+        10.36873,  // 8. Flops
+        1.0        // 9. IMUL
     };
 
     // Check for CPU capabilities
@@ -132,7 +134,8 @@ int main()
     std::cout << "* * *  Welcome to A 'Phenom'inal benchmark!  * * *" << std::endl;
     std::cout << std::endl;
     std::cout << "This benchmark will time your CPU performance against an AMD Quad Core Phenom II"
-        "810 from the year 2009." << std::endl;
+                 "810 from the year 2009."
+              << std::endl;
     std::cout << std::endl;
 
     if (VMX_CAPABLE)
@@ -206,7 +209,8 @@ int main()
                 currentFunction = IMUL_REG_REG;
                 break;
             case 10:
-                threadCount = (1 * (threadCount != 1)) + (std::thread::hardware_concurrency() * (threadCount == 1));
+                threadCount = (1 * (threadCount != 1)) +
+                              (std::thread::hardware_concurrency() * (threadCount == 1));
                 break;
             case 11:
                 threadCount = 4;
@@ -280,7 +284,7 @@ int main()
         double phenom2 = phenom2_performance[(option - 1) + (7 * (threadCount == 1))];
 
         std::cout << "Average latency/run: \033[1;32m" << avgTime << "s\033[37m +/- \033[32m"
-            << stddevTime << "s\033[0m" << std::endl;
+                  << stddevTime << "s\033[0m" << std::endl;
         std::cout << "Executed " << gops << " billion instructions/second" << std::endl;
         std::cout << "Score: " << (gops / phenom2) << " Phenom's II's worth's" << std::endl;
     }
