@@ -9,7 +9,7 @@ make -B
 ```
 Then run the application 
 
-If testing flops: run option 6 (sse) vs option 7(best ISA available, typically AVX1/2 or AVX512)
+If testing flops: run option 6 (sse), option 7 (avx) vs option 8 (best ISA available, typically AVX1/2 or AVX512)
 
 
 ## Context
