@@ -4,5 +4,6 @@
 %include "ADD_REG_1.asm"
 %include "SHR_REG_CL.asm"
 %include "AVXChecker.asm"
+%include "VMXChecker.asm"
 %include "FLOPS.asm"
 %include "IMUL_REG_REG.asm"
